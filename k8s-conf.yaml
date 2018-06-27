@@ -1,7 +1,9 @@
+# TODO: templatable names (e.g. ${ENVIRONMENT}-${OWNER}-blorg-fe)
+
 apiVersion: v1
 kind: Service
 metadata:
-  name: conftest-devel-maiamcc-lb-blorgfrontend
+  name: devel-maiamcc-lb-blorg-fe
   labels:
     app: blorg
     owner: maiamcc
@@ -21,7 +23,7 @@ spec:
 apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
-  name: conftest-devel-maiamcc-blorgfrontend
+  name: devel-maiamcc-blorg-fe
 spec:
   selector:
     matchLabels:
@@ -31,7 +33,7 @@ spec:
       tier: backend
   template:
     metadata:
-      name: conftest-devel-maiamcc-blorgfrontend
+      name: devel-maiamcc-blorg-fe
       labels:
         app: blorg
         owner: maiamcc
