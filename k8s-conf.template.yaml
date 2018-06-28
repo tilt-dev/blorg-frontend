@@ -1,0 +1,48 @@
+# Template should be populated using populate_config_template.py
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: %(environment)s-%(owner)s-lb-blorg-fe
+  labels:
+    app: blorg
+    owner: %(owner)s
+    environment: %(environment)s
+    tier: frontend
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 8080
+    targetPort: 8080
+  selector:
+    app: blorg
+    owner: %(owner)s
+    environment: %(environment)s
+    tier: frontend
+---
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: %(environment)s-%(owner)s-blorg-fe
+spec:
+  selector:
+    matchLabels:
+      app: blorg
+      owner: %(owner)s
+      environment: %(environment)s
+      tier: frontend
+  template:
+    metadata:
+      name: %(environment)s-%(owner)s-blorg-fe
+      labels:
+        app: blorg
+        owner: %(owner)s
+        environment: %(environment)s
+        tier: frontend
+    spec:
+      containers:
+      - name: frontend
+      # TODO(maia): flag for backend server IP
+        image: gcr.io/%(gcloud_proj)s/blorg-frontend
+        ports:
+        - containerPort: 8080
