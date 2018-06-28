@@ -50,10 +50,6 @@ def main():
     args = parse_args()
     user = getpass.getuser()
 
-    print('user:', user)
-    print('env:', args.environment)
-    print('file:', args.file)
-
     temp_vals = {
         KEY_ENVIRONMENT: args.environment,
         KEY_OWNER: user,
