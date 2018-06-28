@@ -8,7 +8,11 @@ import (
 	"github.com/gorilla/mux"
 )
 
+
 func main() {
+	// backend := flag.String("backendAddr", "localhost:8081", "address of the blorg backend server")
+	// flag.Parse()
+
 	r := mux.NewRouter()
 	r.HandleFunc("/", Hello)
 	http.Handle("/", r)
