@@ -43,6 +43,6 @@ spec:
       containers:
       - name: frontend
       # TODO(maia): flag for backend server IP
-        image: gcr.io/%(gcloud_proj)s/blorg-frontend
+        image: gcr.io/%(gcloud_proj)s/blorg-frontend:%(docker_tag)s
         ports:
         - containerPort: 8080

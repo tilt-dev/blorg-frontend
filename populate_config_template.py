@@ -11,6 +11,7 @@ ENV_PROD = 'prod'
 KEY_ENVIRONMENT = 'environment'
 KEY_OWNER = 'owner'
 KEY_GCLOUD_PROJ = 'gcloud_proj'
+KEY_DOCKER_TAG = 'docker_tag'
 
 ENV_TO_PROJ = {
     ENV_DEVEL: 'blorg-dev',
@@ -45,21 +46,33 @@ def write_file(filename, contents):
         outfile.write(contents)
 
 
+def outfile_name(infile):
+    """Given infile (i.e. template file), generates outfile name."""
+    outfile = '%s.%s' % (infile, 'generated')
+    if 'template' in infile:
+        outfile = infile.replace('template', 'generated')
+    return outfile
+
+
+def docker_tag(owner, env):
+    return '%s-%s' % (env, owner)
+
+
 def main():
     # setup
     args = parse_args()
-    user = getpass.getuser()
+    owner = getpass.getuser()
 
     temp_vals = {
         KEY_ENVIRONMENT: args.environment,
-        KEY_OWNER: user,
-        KEY_GCLOUD_PROJ: ENV_TO_PROJ[args.environment]
+        KEY_OWNER: owner,
+        KEY_GCLOUD_PROJ: ENV_TO_PROJ[args.environment],
+        KEY_DOCKER_TAG: docker_tag(owner, args.environment)
     }
     template = get_file(args.file)
 
-    outfile = "%s.%s" % (args.file, 'generated')
-    if 'template' in args.file:
-        outfile = args.file.replace('template', 'generated')
+    outfile = outfile_name(args.file)
+
     populated = template % temp_vals
 
     write_file(outfile, populated)
