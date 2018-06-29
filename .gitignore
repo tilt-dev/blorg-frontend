@@ -3,3 +3,6 @@ k8s-conf.generated.yaml
 
 # text editor stuff
 .idea
+
+# python stuff
+*.pyc

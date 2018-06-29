@@ -1,22 +1,13 @@
 #!/usr/bin/env python
 
+import deploy_utils as utils
+
 import argparse
 import getpass
 
-DEFAULT_TEMPLATE = 'k8s-conf.template.yaml'
-
-ENV_DEVEL = 'devel'
-ENV_PROD = 'prod'
-
 KEY_ENVIRONMENT = 'environment'
 KEY_OWNER = 'owner'
-KEY_GCLOUD_PROJ = 'gcloud_proj'
-KEY_DOCKER_TAG = 'docker_tag'
-
-ENV_TO_PROJ = {
-    ENV_DEVEL: 'blorg-dev',
-    ENV_PROD: 'blorg-prod'  # probably? idk!
-}
+KEY_IMAGE_NAME = 'imgname'
 
 
 def parse_args():
@@ -25,11 +16,11 @@ def parse_args():
         description='Populate k8s config file template with the appropriate values.')
     parser.add_argument('environment', type=str,
                         help='environment you\'re deploying to',
-                        choices=[ENV_DEVEL, ENV_PROD])
+                        choices=[utils.ENV_DEVEL, utils.ENV_PROD])
     parser.add_argument('--file', type=str,
                         help=('path to template file (default: %s)' %
-                              DEFAULT_TEMPLATE),
-                        default=DEFAULT_TEMPLATE)
+                              utils.DEFAULT_TEMPLATE),
+                        default=utils.DEFAULT_TEMPLATE)
     return parser.parse_args()
 
 
@@ -47,35 +38,40 @@ def write_file(filename, contents):
 
 
 def outfile_name(infile):
-    """Given infile (i.e. template file), generates outfile name."""
+    """Given infile (i.e. template file), generate outfile name."""
     outfile = '%s.%s' % (infile, 'generated')
     if 'template' in infile:
         outfile = infile.replace('template', 'generated')
     return outfile
 
 
-def docker_tag(owner, env):
-    return '%s-%s' % (env, owner)
-
-
-def main():
-    # setup
-    args = parse_args()
-    owner = getpass.getuser()
-
+def populate_config_template(infile, env, owner):
+    """
+    Populate config template (`infile`) with the given environment and owner.
+    Return the path of the generated config file.
+    """
     temp_vals = {
-        KEY_ENVIRONMENT: args.environment,
+        KEY_ENVIRONMENT: env,
         KEY_OWNER: owner,
-        KEY_GCLOUD_PROJ: ENV_TO_PROJ[args.environment],
-        KEY_DOCKER_TAG: docker_tag(owner, args.environment)
+        KEY_IMAGE_NAME: utils.image_name(env, owner),
     }
-    template = get_file(args.file)
+    template = get_file(infile)
 
-    outfile = outfile_name(args.file)
+    outfile = outfile_name(infile)
 
     populated = template % temp_vals
 
     write_file(outfile, populated)
+
+    return outfile
+
+
+def main():
+    args = parse_args()
+    owner = getpass.getuser()
+
+    outfile = populate_config_template(args.file, args.environment, owner)
+    print('Successfully generated config file: "%s"' % outfile)
 
 
 if __name__ == '__main__':

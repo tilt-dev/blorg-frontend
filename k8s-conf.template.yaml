@@ -20,7 +20,7 @@ spec:
     environment: %(environment)s
     tier: frontend
 ---
-apiVersion: apps/v1beta2
+apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: %(environment)s-%(owner)s-blorg-fe
@@ -42,7 +42,8 @@ spec:
     spec:
       containers:
       - name: frontend
+        imagePullPolicy: Always
       # TODO(maia): flag for backend server IP
-        image: gcr.io/%(gcloud_proj)s/blorg-frontend:%(docker_tag)s
+        image: %(imgname)s
         ports:
         - containerPort: 8080
