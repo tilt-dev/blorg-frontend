@@ -8,6 +8,7 @@ import getpass
 import subprocess
 import textwrap
 
+
 def parse_args():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -20,14 +21,15 @@ def parse_args():
         3. generate k8s config file (by populating template)
         4. create/update k8s from config file
         
-        # TODO(maia): actually implement this
         If this is your first time deploying to the dev cluster, run with flag --first-deploy.
-        (Actually jk this isn't implemented yet, it's here as a TODO o_0 )
         """))
     parser.add_argument('--config_template', '-c', type=str,
                         help=('path to config template file (default: %s)' %
                               utils.DEFAULT_TEMPLATE),
                         default=utils.DEFAULT_TEMPLATE)
+    parser.add_argument('--first_deploy', action='store_true',
+                        help=('use this flag if this is your first blorg deploy ('
+                              'will set the appropriate cluster, etc.)'))
     return parser.parse_args()
 
 
@@ -37,10 +39,28 @@ def main():
     owner = getpass.getuser()
     imgname = utils.image_name(utils.ENV_DEVEL, owner)
 
+    if args.first_deploy:
+        proj = utils.ENV_TO_PROJ[utils.ENV_DEVEL]
+        print('+ Configuring kubectl for approriate cluster...')
+        out = subprocess.check_output(
+            ['gcloud', 'container', 'clusters', 'get-credentials', 'blorg', '--zone',
+             'us-central1-b', '--project', proj])
+        print('~~~ Configured kubectl for cluster "%s" with output:\n%s' %
+              (proj, utils.tab_lines(out.decode("utf-8"))))
+
+        # NOTE(maia): I'm not actually sure if this will work b/c I think this command
+        # requires user input... well, we'll see!
+        print('+ Authorizing Docker push for gcloud repo...')
+        out = subprocess.check_output(
+            ['gcloud', 'auth', 'configure-docker'])
+        print('~~~ Docker authorized to gcloud repo with output:\n%s' %
+              utils.tab_lines(out.decode("utf-8")))
+
     # 1. (re)build Docker image
     print('+ (Re)building Docker image...')
     out = subprocess.check_output(['docker', 'build', '-t', imgname, '.'])
-    print('~~~ Built Docker image "%s" with output:\n%s' % (imgname, utils.tab_lines(out.decode("utf-8"))))
+    print('~~~ Built Docker image "%s" with output:\n%s' %
+          (imgname, utils.tab_lines(out.decode("utf-8"))))
 
     # 2. push docker image to gcr.io
     print('+ Pushing Docker image...')
@@ -66,11 +86,13 @@ def main():
         selectors.append('-l')
         selectors.append(selector)
     out = subprocess.check_output(['kubectl', 'delete', 'pods'] + selectors)
-    print('~~~ Deleted existing pods (if any) with output:\n%s' % utils.tab_lines(out.decode("utf-8")))
+    print('~~~ Deleted existing pods (if any) with output:\n%s' %
+          utils.tab_lines(out.decode("utf-8")))
 
     print('+ Applying generated k8s config...')
     out = subprocess.check_output(['kubectl', 'apply', '-f', config])
-    print('~~~ Successfully applied config with output:\n%s' % utils.tab_lines(out.decode("utf-8")))
+    print('~~~ Successfully applied config with output:\n%s' %
+          utils.tab_lines(out.decode("utf-8")))
 
 
 if __name__ == '__main__':
