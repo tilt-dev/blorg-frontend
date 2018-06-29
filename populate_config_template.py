@@ -45,7 +45,7 @@ def outfile_name(infile):
     return outfile
 
 
-def populate_template(infile, env, owner):
+def populate_config_template(infile, env, owner):
     """
     Populate config template (`infile`) with the given environment and owner.
     Return the path of the generated config file.
@@ -53,7 +53,7 @@ def populate_template(infile, env, owner):
     temp_vals = {
         KEY_ENVIRONMENT: env,
         KEY_OWNER: owner,
-        KEY_IMAGE_NAME: utils.image_name(owner, env),
+        KEY_IMAGE_NAME: utils.image_name(env, owner),
     }
     template = get_file(infile)
 
@@ -70,7 +70,7 @@ def main():
     args = parse_args()
     owner = getpass.getuser()
 
-    outfile = populate_template(args.file, args.environment, owner)
+    outfile = populate_config_template(args.file, args.environment, owner)
     print('Successfully generated config file: "%s"' % outfile)
 
 
