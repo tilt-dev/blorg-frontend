@@ -43,7 +43,10 @@ spec:
       containers:
       - name: frontend
         imagePullPolicy: Always
-      # TODO(maia): flag for backend server IP
         image: %(imgname)s
+        command: [
+          "./server",
+          "--backendAddr", "%(backend_addr)s"
+        ]
         ports:
         - containerPort: 8081
