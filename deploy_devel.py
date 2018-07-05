@@ -14,13 +14,13 @@ def parse_args():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=textwrap.dedent("""
         Deploy the `blorg frontend` app to Kubernetes development cluster (i.e. NOT PROD).
-        
+
         Deploy consists of the following steps:
         1. (re)build Docker image
         2. push docker image to gcr.io
         3. generate k8s config file (by populating template)
         4. create/update k8s from config file
-        
+
         If this is your first time deploying to the dev cluster, run with flag --first-deploy.
         """))
     parser.add_argument('--config_template', '-c', type=str,
@@ -83,9 +83,10 @@ def main():
     }
     selectors = []
     for selector in ['%s=%s' % (k, v) for k, v in labels.iteritems()]:
-        selectors.append('-l')
         selectors.append(selector)
-    out = subprocess.check_output(['kubectl', 'delete', 'pods'] + selectors)
+    selectors_string = ",".join(selectors)
+    cmd = ['kubectl', 'delete', 'pods', '-l', selectors_string]
+    out = subprocess.check_output(cmd)
     print('~~~ Deleted existing pods (if any) with output:\n%s' %
           utils.tab_lines(out.decode("utf-8")))
 
