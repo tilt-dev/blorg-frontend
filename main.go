@@ -51,7 +51,7 @@ func Ping(w http.ResponseWriter, req *http.Request) {
 	if resp.StatusCode != 200 || strings.TrimSpace(string(body)) != "pong" {
 		w.WriteHeader(500)
 		fmt.Fprintf(w,
-			"Expected 'pong'; backend server responded with 'pong' (status: %s)\n", resp.Status)
+			"Expected 'pong'; backend server said '%s' (%s)\n", strings.TrimSpace(string(body)), resp.Status)
 		return
 	}
 
