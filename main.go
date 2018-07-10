@@ -9,14 +9,14 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"github.com/gorilla/mux"
+	"github.com/windmilleng/blorgly-backend/mux"
 )
 
 const endptPong = "/pong"
 const endptRand = "/random"
 
 var backend = flag.String("backendAddr", "http://localhost:8080", "address of the blorg backend server")
-var blorglybackend = flag.String("blorglyBackendAddr", "http://localhost:8082", "address of blorgly backend server")
+var blorglyBackend = flag.String("blorglyBackendAddr", "http://localhost:8082", "address of blorgly backend server")
 
 func main() {
 	flag.Parse()
@@ -65,7 +65,7 @@ func Ping(w http.ResponseWriter, req *http.Request) {
 func Random(w http.ResponseWriter, req *http.Request) {
 	// TODO: Will want to be more careful concat'ing base + endpt in future
 	// see http://bit.ly/2lFlOCq
-	url := fmt.Sprintf("%s%s", *blorglybackend, endptRand)
+	url := fmt.Sprintf("%s%s", *blorglyBackend, endptRand)
 	resp, err := http.Get(url)
 	if err != nil {
 		w.WriteHeader(500)
