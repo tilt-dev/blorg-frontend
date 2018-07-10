@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 
@@ -26,12 +27,17 @@ func main() {
 	r.HandleFunc("/ping", Ping)
 	r.HandleFunc("/random", Random)
 	http.Handle("/", r)
+	http.Handle("/public/", http.StripPrefix("/public/", http.FileServer(http.Dir("public"))))
 	fmt.Println("Starting up on 8081")
 	log.Fatal(http.ListenAndServe(":8081", nil))
 }
 
 func Hello(w http.ResponseWriter, req *http.Request) {
-	fmt.Fprintln(w, "I'm the frontend server.")
+	// Templating is currently broken
+	p := "What"
+
+	t, _ := template.ParseFiles("create-url.html")
+	t.Execute(w, p)
 }
 
 func Ping(w http.ResponseWriter, req *http.Request) {
