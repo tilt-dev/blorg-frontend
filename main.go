@@ -16,7 +16,6 @@ import (
 	"google.golang.org/grpc"
 )
 
-const endptPong = "/pong"
 const endptRand = "/random"
 
 var backend = flag.String("backendAddr", "localhost:8080", "address of the blorg backend server")
@@ -34,8 +33,8 @@ func main() {
 	conn = c
 	storage = pb.NewBackendClient(conn)
 	r := mux.NewRouter()
-	r.HandleFunc("/be2", Backend2)
 	r.HandleFunc("/", Storage)
+	r.HandleFunc(endptRand, Randomizer)
 
 	http.Handle("/", r)
 	http.Handle("/public/", http.StripPrefix("/public/", http.FileServer(http.Dir("public"))))
@@ -63,7 +62,7 @@ func Storage(w http.ResponseWriter, req *http.Request) {
 	t.Execute(w, p)
 }
 
-func Backend2(w http.ResponseWriter, req *http.Request) {
+func Randomizer(w http.ResponseWriter, req *http.Request) {
 	// TODO: Will want to be more careful concat'ing base + endpt in future
 	// see http://bit.ly/2lFlOCq
 	url := fmt.Sprintf("%s%s", *blorglyBackend, endptRand)
