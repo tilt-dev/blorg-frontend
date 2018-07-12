@@ -1,27 +1,38 @@
+//go:generate protoc -I ../blorg-backend/proto --go_out=plugins=grpc:./proto ../blorg-backend/proto/backend.proto
 package main
 
 import (
+	"context"
+	"flag"
 	"fmt"
 	"html/template"
+	"io/ioutil"
 	"log"
 	"net/http"
-
-	"flag"
-	"io/ioutil"
 	"strings"
 
-	"github.com/windmilleng/blorgly-backend/mux"
+	"github.com/gorilla/mux"
+	pb "github.com/windmilleng/blorg-frontend/proto"
+	"google.golang.org/grpc"
 )
 
 const endptPong = "/pong"
 const endptRand = "/random"
 
-var backend = flag.String("backendAddr", "http://localhost:8080", "address of the blorg backend server")
+var backend = flag.String("backendAddr", "localhost:8080", "address of the blorg backend server")
 var blorglyBackend = flag.String("blorglyBackendAddr", "http://localhost:8082", "address of blorgly backend server")
+var conn *grpc.ClientConn
+var client pb.BackendClient
 
 func main() {
 	flag.Parse()
 
+	c, err := grpc.Dial(*backend, grpc.WithInsecure())
+	if err != nil {
+		log.Fatalf("Dialing backend server resulted in error: %v\n", err)
+	}
+	conn = c
+	client = pb.NewBackendClient(conn)
 	r := mux.NewRouter()
 	r.HandleFunc("/", Hello)
 	r.HandleFunc("/ping", Ping)
@@ -41,27 +52,11 @@ func Hello(w http.ResponseWriter, req *http.Request) {
 }
 
 func Ping(w http.ResponseWriter, req *http.Request) {
-	// TODO(maia): Will want to be more careful concat'ing base + endpt in future
-	// see http://bit.ly/2lFlOCq
-	url := fmt.Sprintf("%s%s", *backend, endptPong)
-	resp, err := http.Get(url)
+	ctx := context.Background()
+	_, err := client.Pong(ctx, &pb.PongRequest{})
 	if err != nil {
 		w.WriteHeader(500)
 		fmt.Fprintf(w, "Request to backend server resulted in error: %v\n", err)
-		return
-	}
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		w.WriteHeader(500)
-		fmt.Fprintf(w, "Could not read backend server resp. with error: %v\n", err)
-		return
-	}
-
-	if resp.StatusCode != 200 || strings.TrimSpace(string(body)) != "pong" {
-		w.WriteHeader(500)
-		fmt.Fprintf(w,
-			"Expected 'pong'; backend server said '%s' (%s)\n", strings.TrimSpace(string(body)), resp.Status)
 		return
 	}
 
@@ -73,6 +68,7 @@ func Random(w http.ResponseWriter, req *http.Request) {
 	// see http://bit.ly/2lFlOCq
 	url := fmt.Sprintf("%s%s", *blorglyBackend, endptRand)
 	resp, err := http.Get(url)
+
 	if err != nil {
 		w.WriteHeader(500)
 		fmt.Fprintf(w, "Request to backend server resulted in error: %v\n", err)
