@@ -54,7 +54,7 @@ def populate_config_template(infile, env, owner):
         KEY_ENVIRONMENT: env,
         KEY_OWNER: owner,
         KEY_IMAGE_NAME: utils.image_name(env, owner),
-        KEY_BACKEND_ADDR: 'http://%s-%s-lb-blorg-be:8080' % (env, owner),
+        KEY_BACKEND_ADDR: '%s-%s-lb-blorg-be:8080' % (env, owner),
     }
     template = get_file(infile)
 
