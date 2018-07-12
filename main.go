@@ -35,8 +35,9 @@ func main() {
 	client = pb.NewBackendClient(conn)
 	r := mux.NewRouter()
 	r.HandleFunc("/", Hello)
-	r.HandleFunc("/ping", Ping)
-	r.HandleFunc("/random", Random)
+	r.HandleFunc("/be1", Backend1)
+	r.HandleFunc("/be2", Backend2)
+
 	http.Handle("/", r)
 	http.Handle("/public/", http.StripPrefix("/public/", http.FileServer(http.Dir("public"))))
 	fmt.Println("Starting up on 8081")
@@ -51,7 +52,7 @@ func Hello(w http.ResponseWriter, req *http.Request) {
 	t.Execute(w, p)
 }
 
-func Ping(w http.ResponseWriter, req *http.Request) {
+func Backend1(w http.ResponseWriter, req *http.Request) {
 	ctx := context.Background()
 	_, err := client.Pong(ctx, &pb.PongRequest{})
 	if err != nil {
@@ -63,7 +64,7 @@ func Ping(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprintf(w, "SUCCESS! ﾍ(=￣∇￣)ﾉ\n")
 }
 
-func Random(w http.ResponseWriter, req *http.Request) {
+func Backend2(w http.ResponseWriter, req *http.Request) {
 	// TODO: Will want to be more careful concat'ing base + endpt in future
 	// see http://bit.ly/2lFlOCq
 	url := fmt.Sprintf("%s%s", *blorglyBackend, endptRand)
@@ -89,5 +90,5 @@ func Random(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, "SUCCESS! ﾍ(=￣∇￣)ﾉ\n")
+	fmt.Fprintf(w, "SUCCESS! ﾍ(=￣∇￣)ﾉ\nSUCCESS! ﾍ(=￣∇￣)ﾉ")
 }
