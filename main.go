@@ -22,7 +22,7 @@ const endptRand = "/random"
 var backend = flag.String("backendAddr", "localhost:8080", "address of the blorg backend server")
 var blorglyBackend = flag.String("blorglyBackendAddr", "http://localhost:8082", "address of blorgly backend server")
 var conn *grpc.ClientConn
-var client pb.BackendClient
+var storage pb.BackendClient
 
 func main() {
 	flag.Parse()
@@ -32,11 +32,10 @@ func main() {
 		log.Fatalf("Dialing backend server resulted in error: %v\n", err)
 	}
 	conn = c
-	client = pb.NewBackendClient(conn)
+	storage = pb.NewBackendClient(conn)
 	r := mux.NewRouter()
-	r.HandleFunc("/", Hello)
-	r.HandleFunc("/be1", Backend1)
 	r.HandleFunc("/be2", Backend2)
+	r.HandleFunc("/", Storage)
 
 	http.Handle("/", r)
 	http.Handle("/public/", http.StripPrefix("/public/", http.FileServer(http.Dir("public"))))
@@ -44,24 +43,24 @@ func main() {
 	log.Fatal(http.ListenAndServe(":8081", nil))
 }
 
-func Hello(w http.ResponseWriter, req *http.Request) {
-	// Templating is currently broken
-	p := "What"
+func Storage(w http.ResponseWriter, req *http.Request) {
+	if req.Method == "POST" {
+		req.ParseForm()
+		log.Printf("%+v", req.Form)
 
-	t, _ := template.ParseFiles("create-url.html")
-	t.Execute(w, p)
-}
-
-func Backend1(w http.ResponseWriter, req *http.Request) {
-	ctx := context.Background()
-	_, err := client.Pong(ctx, &pb.PongRequest{})
-	if err != nil {
-		w.WriteHeader(500)
-		fmt.Fprintf(w, "Request to backend server resulted in error: %v\n", err)
-		return
+		ctx := context.Background()
+		url := req.Form.Get("url")
+		_, err := storage.CreateGolink(ctx, &pb.Golink{Name: "cat", Address: url})
+		if err != nil {
+			w.WriteHeader(500)
+			fmt.Fprintf(w, "Request to backend server resulted in error: %v\n", err)
+			return
+		}
 	}
 
-	fmt.Fprintf(w, "SUCCESS! ﾍ(=￣∇￣)ﾉ\n")
+	p := "tech"
+	t, _ := template.ParseFiles("create-url.html")
+	t.Execute(w, p)
 }
 
 func Backend2(w http.ResponseWriter, req *http.Request) {
