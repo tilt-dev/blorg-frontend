@@ -108,11 +108,11 @@
       <img src="public/logo.svg" width="150" height="150"/>
       <div class="logo-text">
         <h1>Blorg.ly.<em>chain</em></h1>
-        <p>mapping the world's technologies</p>
+        <p>mapping the world's {{.}}</p>
       </div>
     </header>
-    <form action="/" method="PUT">
-      <input type="text" id="name" name="name" placeholder="type a name" />
+    <form action="/" method="POST">
+      <input type="text" id="url" name="url" placeholder="your link here" />
       <input type="submit" value="Save">
     </form>
   </main>

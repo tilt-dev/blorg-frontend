@@ -58,7 +58,7 @@ func Storage(w http.ResponseWriter, req *http.Request) {
 	}
 
 	p := "tech"
-	t, _ := template.ParseFiles("create-url.html")
+	t, _ := template.ParseFiles("index.html")
 	t.Execute(w, p)
 }
 
