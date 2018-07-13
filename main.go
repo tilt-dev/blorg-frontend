@@ -45,7 +45,6 @@ func main() {
 func Storage(w http.ResponseWriter, req *http.Request) {
 	if req.Method == "POST" {
 		req.ParseForm()
-		log.Printf("%+v", req.Form)
 
 		ctx := context.Background()
 		url := req.Form.Get("url")
