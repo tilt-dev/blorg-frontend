@@ -16,13 +16,12 @@ import (
 	"google.golang.org/grpc"
 )
 
-const endptPong = "/pong"
 const endptRand = "/random"
 
 var backend = flag.String("backendAddr", "localhost:8080", "address of the blorg backend server")
 var blorglyBackend = flag.String("blorglyBackendAddr", "http://localhost:8082", "address of blorgly backend server")
 var conn *grpc.ClientConn
-var client pb.BackendClient
+var storage pb.BackendClient
 
 func main() {
 	flag.Parse()
@@ -32,38 +31,37 @@ func main() {
 		log.Fatalf("Dialing backend server resulted in error: %v\n", err)
 	}
 	conn = c
-	client = pb.NewBackendClient(conn)
+	storage = pb.NewBackendClient(conn)
 	r := mux.NewRouter()
-	r.HandleFunc("/", Hello)
-	r.HandleFunc("/ping", Ping)
-	r.HandleFunc("/random", Random)
+	r.HandleFunc("/", Storage)
+	r.HandleFunc(endptRand, Randomizer)
+
 	http.Handle("/", r)
 	http.Handle("/public/", http.StripPrefix("/public/", http.FileServer(http.Dir("public"))))
 	fmt.Println("Starting up on 8081")
 	log.Fatal(http.ListenAndServe(":8081", nil))
 }
 
-func Hello(w http.ResponseWriter, req *http.Request) {
-	// Templating is currently broken
-	p := "What"
+func Storage(w http.ResponseWriter, req *http.Request) {
+	if req.Method == "POST" {
+		req.ParseForm()
 
-	t, _ := template.ParseFiles("create-url.html")
+		ctx := context.Background()
+		url := req.Form.Get("url")
+		_, err := storage.CreateGolink(ctx, &pb.Golink{Name: "cat", Address: url})
+		if err != nil {
+			w.WriteHeader(500)
+			fmt.Fprintf(w, "Request to backend server resulted in error: %v\n", err)
+			return
+		}
+	}
+
+	p := "tech"
+	t, _ := template.ParseFiles("index.html")
 	t.Execute(w, p)
 }
 
-func Ping(w http.ResponseWriter, req *http.Request) {
-	ctx := context.Background()
-	_, err := client.Pong(ctx, &pb.PongRequest{})
-	if err != nil {
-		w.WriteHeader(500)
-		fmt.Fprintf(w, "Request to backend server resulted in error: %v\n", err)
-		return
-	}
-
-	fmt.Fprintf(w, "SUCCESS! ﾍ(=￣∇￣)ﾉ\n")
-}
-
-func Random(w http.ResponseWriter, req *http.Request) {
+func Randomizer(w http.ResponseWriter, req *http.Request) {
 	// TODO: Will want to be more careful concat'ing base + endpt in future
 	// see http://bit.ly/2lFlOCq
 	url := fmt.Sprintf("%s%s", *blorglyBackend, endptRand)
@@ -89,5 +87,5 @@ func Random(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, "SUCCESS! ﾍ(=￣∇￣)ﾉ\n")
+	fmt.Fprintf(w, "SUCCESS! ﾍ(=￣∇￣)ﾉ\nSUCCESS! ﾍ(=￣∇￣)ﾉ")
 }

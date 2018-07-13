@@ -10,14 +10,14 @@
       --blue:      #6FAAE8;
       --pool:      #7AE9FF;
       --gray:      #444444;
-      --white:      #FFFFFF;
+      --white:     #FFFFFF;
     }
 
     body {
       margin: 0;
       padding: 0;
 
-      /* https://www.svgbackgrounds.com/#abstract-envelope  */
+      /* https://www.svgbackgrounds.com/#abstract-envelope */
       background-color: var(--blue-plum);
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25' viewBox='0 0 2 1'%3E%3Cdefs%3E%3ClinearGradient id='a' gradientUnits='userSpaceOnUse' x1='0' x2='0' y1='0' y2='1'%3E%3Cstop offset='0' stop-color='%2377aa77'/%3E%3Cstop offset='1' stop-color='%234fd'/%3E%3C/linearGradient%3E%3ClinearGradient id='b' gradientUnits='userSpaceOnUse' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23cf8' stop-opacity='0'/%3E%3Cstop offset='1' stop-color='%23cf8' stop-opacity='1'/%3E%3C/linearGradient%3E%3ClinearGradient id='c' gradientUnits='userSpaceOnUse' x1='0' y1='0' x2='2' y2='2'%3E%3Cstop offset='0' stop-color='%23cf8' stop-opacity='0'/%3E%3Cstop offset='1' stop-color='%23cf8' stop-opacity='1'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='0' y='0' fill='url(%23a)' width='2' height='1'/%3E%3Cg fill-opacity='0.5'%3E%3Cpolygon fill='url(%23b)' points='0 1 0 0 2 0'/%3E%3Cpolygon fill='url(%23c)' points='2 1 2 0 0 0'/%3E%3C/g%3E%3C/svg%3E");
       background-attachment: fixed;
@@ -50,6 +50,11 @@
       font-size: 2.5em;
       margin-top: 0.5em;
       margin-bottom: 0;
+    }
+
+    header h1 em {
+      font-style: normal;
+      color: var(--pink);
     }
 
     header p {
@@ -102,12 +107,12 @@
     <header>
       <img src="public/logo.svg" width="150" height="150"/>
       <div class="logo-text">
-        <h1>Blorg.ly.<span>book</span></h1>
-        <p>mapping the world's technologies</p>
+        <h1>Blorg.ly.<em>chain</em></h1>
+        <p>mapping the world's {{.}}</p>
       </div>
     </header>
-    <form action="create" method="PUT">
-      <input type="text" id="name" name="name" placeholder="type a name" />
+    <form action="/" method="POST">
+      <input type="text" id="url" name="url" placeholder="your link here" />
       <input type="submit" value="Save">
     </form>
   </main>
