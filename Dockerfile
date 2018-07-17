@@ -10,5 +10,5 @@ ENV SRC_DIR=/go/src/github.com/windmilleng/blorg-frontend
 ADD . $SRC_DIR
 
 # Build it:
-RUN cd $SRC_DIR; go build -o server; cp server /app/
+RUN cd $SRC_DIR; go build -o server; cp index.html /app/; cp -r public /app/; cp server /app/
 ENTRYPOINT ["./server"]
