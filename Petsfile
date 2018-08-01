@@ -1,0 +1,13 @@
+# -*- mode: Python -*-
+
+load("go-get://github.com/windmilleng/blorg-backend", "blorg_backend")
+load("go-get://github.com/windmilleng/blorgly-backend", "blorgly_backend")
+
+def fe_local(blorg_backend, blorgly_backend):
+  port = 8081 # hardcoded in main.go
+  fe = start("go run main.go -- --backendAddr=%s --blorglyBackendAddr=%s" %
+             (blorg_backend["host"], blorgly_backend["host"]))
+  return service(fe, "localhost", port)
+
+blorg_frontend = "blorg-frontend"
+register(blorg_frontend, "local", fe_local, deps=[blorg_backend, blorgly_backend])
