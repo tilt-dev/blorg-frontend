@@ -8,8 +8,10 @@ import (
 	"html/template"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gorilla/mux"
 	pb "github.com/windmilleng/blorg-frontend/proto"
@@ -22,9 +24,11 @@ var backend = flag.String("backendAddr", "localhost:8080", "address of the blorg
 var blorglyBackend = flag.String("blorglyBackendAddr", "http://localhost:8082", "address of blorgly backend server")
 var conn *grpc.ClientConn
 var storage pb.BackendClient
+var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
 func main() {
 	flag.Parse()
+	rand.Seed(time.Now().UnixNano())
 
 	c, err := grpc.Dial(*backend, grpc.WithInsecure())
 	if err != nil {
@@ -48,7 +52,12 @@ func Storage(w http.ResponseWriter, req *http.Request) {
 
 		ctx := context.Background()
 		url := req.Form.Get("url")
-		_, err := storage.CreateGolink(ctx, &pb.Golink{Name: "cat", Address: url})
+		name := req.Form.Get("name")
+		if name == "" {
+			// TODO(dmiller): get from randomizer backend instead
+			name = randString()
+		}
+		_, err := storage.CreateGolink(ctx, &pb.Golink{Name: name, Address: url})
 		if err != nil {
 			w.WriteHeader(500)
 			fmt.Fprintf(w, "Request to backend server resulted in error: %v\n", err)
@@ -88,4 +97,12 @@ func Randomizer(w http.ResponseWriter, req *http.Request) {
 	}
 
 	fmt.Fprintf(w, "SUCCESS! ﾍ(=￣∇￣)ﾉ\nSUCCESS! ﾍ(=￣∇￣)ﾉ")
+}
+
+func randString() string {
+	b := make([]rune, 6)
+	for i := range b {
+		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+	}
+	return string(b)
 }
