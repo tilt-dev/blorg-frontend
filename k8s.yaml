@@ -1,0 +1,44 @@
+# Template should be populated using populate_config_template.py
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: lb-blorg-fe
+  labels:
+    app: blorg
+    tier: frontend
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 8081
+    targetPort: 8081
+  selector:
+    app: blorg
+    tier: frontend
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: blorg-fe
+spec:
+  selector:
+    matchLabels:
+      app: blorg
+      tier: frontend
+  template:
+    metadata:
+      name: blorg-fe
+      labels:
+        app: blorg
+        tier: frontend
+    spec:
+      containers:
+      - name: frontend
+        imagePullPolicy: Always
+        image: blorg-dev/blorg-frontend
+        command: [
+          "./server",
+          "--backendAddr", "lb-blorg-be:8080"
+        ]
+        ports:
+        - containerPort: 8081
