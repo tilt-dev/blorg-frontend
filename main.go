@@ -57,7 +57,11 @@ func Storage(w http.ResponseWriter, req *http.Request) {
 	}
 
 	p := "tech"
-	t, _ := template.ParseFiles("index.html")
+	t, err := template.ParseFiles("index.html")
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Template compile error: %v\n", err), 500)
+		return
+	}
 	t.Execute(w, p)
 }
 
