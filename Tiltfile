@@ -5,7 +5,7 @@ def blorg_frontend():
   entrypoint = '/app/server'
   image = build_docker_image('Dockerfile.base', 'gcr.io/blorg-dev/blorg-frontend:devel-' + local('whoami').rstrip('\n'), entrypoint)
   src_dir = '/go/src/github.com/windmilleng/blorg-frontend'
-  image.add(src_dir, local_git_repo('.'))
+  image.add(local_git_repo('.'), src_dir)
   image.run('cd ' + src_dir + '; mkdir -p /app; go build -o server; cp index.html /app/; cp -r public /app/; cp server /app/')
 
   # print(image)
